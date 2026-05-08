@@ -1,0 +1,50 @@
+[
+  {
+    "nombre": "El Roble Perfumado",
+    "url": "https://elrobleperfumado.com/perfumes-mujer/tst-bond-no9-park-avenue-south-edp-100-ml.html",
+    "selectores": [".price", ".precio", "span[itemprop='price']", ".current-price", ".regular-price"],
+    "tipo": "nicho"
+  },
+  {
+    "nombre": "PerfumeDigital",
+    "url": "https://perfumedigital.es/Perfumes-Mujer-TOM-FORD-TOM-FORD-COSTA-AZZURRA-EDP-100-ML-REGULAR",
+    "selectores": [".price", ".precio", ".product-price", ".current-price"],
+    "tipo": "disenador"
+  },
+  {
+    "nombre": "Notino",
+    "url": "https://www.notino.es/dior/sauvage-elixir-eau-de-parfum-para-hombres/",
+    "selectores": [".price", ".product-price", "#product-price", ".price--current"],
+    "tipo": "disenador"
+  },
+  {
+    "nombre": "Druni",
+    "url": "https://www.druni.es/dior-sauvage-elixir-60-ml",
+    "selectores": [".price", ".pvp", ".current-price", ".product-price"],
+    "tipo": "disenador"
+  },
+  {
+    "nombre": "Primor",
+    "url": "https://www.primor.eu/dior/123456-sauvage-elixir.html",
+    "selectores": [".price", ".precio", ".final-price", ".product-price"],
+    "tipo": "disenador"
+  },
+  {
+    "nombre": "Secretodigital",
+    "url": "https://www.secretodigital.com/perfumeria/creed-aventus-100ml",
+    "selectores": [".price", ".precio", ".product-price", ".current-price"],
+    "tipo": "nicho"
+  },
+  {
+    "nombre": "Perfume's Club",
+    "url": "https://www.perfumesclub.com/es/dior/sauvage-elixir-60ml",
+    "selectores": [".price", ".precio", ".product-price"],
+    "tipo": "disenador"
+  },
+  {
+    "nombre": "Arenal",
+    "url": "https://www.arenal.com/dior-sauvage-elixir-60ml",
+    "selectores": [".price", ".precio", ".product-price"],
+    "tipo": "disenador"
+  }
+]

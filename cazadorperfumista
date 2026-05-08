@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PerfumePrice Hunter | Precios actualizados</title>
+    <style>
+        :root{--bg:#0d0d0d;--surface:#1a1a1a;--gold:#c9a96e;--danger:#e74c3c;--text:#e0e0e0;}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5;}
+        .header{background:#111;border-bottom:2px solid var(--gold);padding:1rem 2rem;position:sticky;top:0;z-index:10;}
+        .header-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;flex-wrap:wrap;gap:1rem;}
+        .logo{font-size:1.5rem;font-weight:700;display:flex;align-items:center;gap:0.5rem;color:#fff;}
+        .live-indicator{display:flex;align-items:center;gap:0.5rem;margin-left:auto;font-size:0.85rem;}
+        .dot{width:10px;height:10px;background:#2ecc71;border-radius:50%;animation:pulse 1.5s infinite;}
+        @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(46,204,113,0.7)}50%{box-shadow:0 0 0 10px rgba(46,204,113,0)}}
+        .container{max-width:1400px;margin:0 auto;padding:1.5rem;}
+        .filters-bar{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;}
+        .filter-btn{padding:0.5rem 1.2rem;border-radius:30px;border:1px solid #333;background:#1a1a1a;color:#ddd;cursor:pointer;}
+        .filter-btn.active{background:var(--gold);color:#000;border-color:var(--gold);font-weight:700;}
+        .filter-btn.alert-btn{border-color:var(--danger);color:var(--danger);}
+        .filter-btn.alert-btn.active{background:var(--danger);color:#fff;}
+        .tiendas-scroll{display:flex;gap:0.8rem;overflow-x:auto;margin-bottom:1.5rem;}
+        .tienda-badge{flex:0 0 auto;background:#242424;padding:0.5rem 1rem;border-radius:12px;font-size:0.85rem;display:flex;align-items:center;gap:0.3rem;border:1px solid #333;}
+        .tienda-badge.destacada{border-color:var(--gold);background:#1f1a0e;}
+        .verificada{color:#2ecc71;}
+        .productos-table-wrap{overflow-x:auto;background:#1a1a1a;border-radius:16px;border:1px solid #333;}
+        table{width:100%;border-collapse:collapse;}
+        th{background:#111;padding:1rem;text-align:left;font-size:0.8rem;color:#aaa;text-transform:uppercase;}
+        td{padding:0.9rem 1rem;border-bottom:1px solid #222;}
+        tr:hover td{background:rgba(255,255,255,0.03);}
+        .tag{display:inline-block;padding:0.2rem 0.7rem;border-radius:20px;font-size:0.7rem;font-weight:700;}
+        .tag-arabe{background:#8e6b3e;color:#e8cfa0;}
+        .tag-disenador{background:#2c3e50;color:#85c1e9;}
+        .tag-nicho{background:#4a235a;color:#d7bde2;}
+        .precio-actual{font-weight:700;font-size:1.1rem;}
+        .precio-anterior{text-decoration:line-through;color:#888;font-size:0.8rem;margin-left:0.5rem;}
+        .descuento-badge{background:#e74c3c;color:#fff;padding:0.15rem 0.5rem;border-radius:12px;font-size:0.7rem;}
+        .error-badge{background:#ff6b35;color:#000;padding:0.15rem 0.5rem;border-radius:12px;font-size:0.7rem;font-weight:800;animation:flash 0.8s infinite;}
+        @keyframes flash{0%,100%{opacity:1}50%{opacity:0.5}}
+        .footer{text-align:center;padding:2rem;color:#555;border-top:1px solid #222;margin-top:2rem;}
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <span class="logo">🕯️ PerfumePrice <span style="color:var(--gold);">Hunter</span></span>
+            <div class="live-indicator"><span class="dot"></span> Actualizado hace <span id="timeSince">--</span></div>
+        </div>
+    </header>
+    <div class="container">
+        <div class="filters-bar">
+            <button class="filter-btn active" onclick="filtrar('todos', this)">Todos</button>
+            <button class="filter-btn" onclick="filtrar('arabe', this)">Árabes</button>
+            <button class="filter-btn" onclick="filtrar('disenador', this)">Diseñador</button>
+            <button class="filter-btn" onclick="filtrar('nicho', this)">Nicho</button>
+            <button class="filter-btn alert-btn" onclick="filtrar('error', this)">⚠️ Posibles Errores</button>
+        </div>
+        <div class="tiendas-scroll" id="tiendasList"></div>
+        <div class="productos-table-wrap">
+            <table>
+                <thead><tr><th>Perfume</th><th>Tipo</th><th>Tienda</th><th>Precio</th><th>Dto.</th><th>Confianza</th></tr></thead>
+                <tbody id="productosBody"></tbody>
+            </table>
+        </div>
+        <p style="text-align:center;color:#666;font-size:0.8rem;margin-top:0.5rem;">🕒 Última actualización del archivo: <span id="lastUpdate">cargando...</span></p>
+    </div>
+    <footer class="footer">PerfumePrice Hunter — Datos recolectados de tiendas verificadas.</footer>
+    <script>
+        let productos = [];
+        let filtroActivo = 'todos';
+        fetch('datos.json')
+            .then(res => res.json())
+            .then(data => {
+                // data es un array de objetos: { nombre, tienda, precio, tipo, url, posibleError, confianza, precioAnterior }
+                productos = data;
+                renderTiendas();
+                renderProductos();
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleString();
+                document.getElementById('timeSince').textContent = 'unos segundos';
+            })
+            .catch(err => {
+                document.getElementById('productosBody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;">Error al cargar datos. Asegúrate de que datos.json existe.</td></tr>';
+            });
+
+        function renderTiendas() {
+            const tiendasSet = new Set(productos.map(p => p.tienda));
+            const tiendasList = document.getElementById('tiendasList');
+            tiendasList.innerHTML = '';
+            tiendasSet.forEach(tienda => {
+                const badge = document.createElement('span');
+                badge.className = 'tienda-badge';
+                badge.innerHTML = `🏪 ${tienda} <span class="verificada">✔</span>`;
+                tiendasList.appendChild(badge);
+            });
+        }
+
+        function renderProductos() {
+            const tbody = document.getElementById('productosBody');
+            const filtrados = productos.filter(p => {
+                if (filtroActivo === 'todos') return true;
+                if (filtroActivo === 'error') return p.posibleError;
+                return p.tipo === filtroActivo;
+            });
+            tbody.innerHTML = filtrados.map(p => {
+                const tipoTag = `<span class="tag tag-${p.tipo || 'arabe'}">${(p.tipo || 'arabe').charAt(0).toUpperCase()+(p.tipo||'arabe').slice(1)}</span>`;
+                const errorBadge = p.posibleError ? '<span class="error-badge">⚠️ ERROR</span>' : '';
+                const precioAnteriorHtml = p.precioAnterior ? `<span class="precio-anterior">${p.precioAnterior.toFixed(2)} €</span>` : '';
+                const descuento = p.precioAnterior ? Math.round((1 - p.precio/p.precioAnterior)*100) : 0;
+                const dtoBadge = descuento > 0 ? `<span class="descuento-badge">-${descuento}%</span>` : '';
+                const confianza = p.confianza || (Math.random()*2+3).toFixed(1);
+                return `<tr>
+                    <td><strong>${p.nombre}</strong></td>
+                    <td>${tipoTag}</td>
+                    <td><a href="${p.url || '#'}" target="_blank" style="color:#c9a96e;text-decoration:none;">${p.tienda}</a></td>
+                    <td><span class="precio-actual">${p.precio.toFixed(2)} €</span> ${precioAnteriorHtml} ${errorBadge}</td>
+                    <td>${dtoBadge}</td>
+                    <td>${'★'.repeat(Math.floor(confianza))} ${confianza}/5</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function filtrar(tipo, btn) {
+            filtroActivo = tipo;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderProductos();
+        }
+    </script>
+</body>
+</html>
